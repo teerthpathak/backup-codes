@@ -1,0 +1,51 @@
+* {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif, Helvetica, Verdana, Geneva, Tahoma;
+}
+
+body {
+    background: #f8f9fa;
+}
+
+.navbar-dark .navbar-brand {
+    font-weight: bold;
+    font-size: 1.25rem;
+}
+
+.center-card {
+    max-width: 800px;
+    margin: 40px auto;
+}
+
+.card {
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.card-body {
+    padding: 2rem;
+}
+
+.form-control {
+    border-radius: 8px;
+}
+
+.btn {
+    border-radius: 8px;
+}
+
+#message {
+    display: none;
+    color: red;
+}
+
+pre {
+    font-family: Arial, sans-serif, Helvetica, Verdana, Geneva, Tahoma;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+footer {
+    margin-bottom: 0px;
+}
