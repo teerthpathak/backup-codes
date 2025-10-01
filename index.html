@@ -66,13 +66,11 @@
                 <div class="card-body">
                     <h4 class="card-title mb-3 text-center">Securely store your 2-step verification backup codes</h4>
                     <div class="mb-3">
-                        <label class="form-label" id="number_of_codes">Codes</label>
+                        <label class="form-label">Codes (<label id="number_of_codes"></label> Codes Available)</label>
                         <pre class="p-3 bg-white border rounded"></pre>
                         <div class="mt-2 d-flex gap-2">
-                            <button class="btn btn-danger" onclick="deleteCodes('delete'); getCodes();">Clear</button>
-                            <button class="btn btn-primary" onclick="copyACode(true);">Copy A Code & Delete It</button>
-                            <button class="btn btn-outline-primary" onclick="copyACode(false);">Copy A Code & Keep
-                                It</button>
+                            <button class="btn btn-danger" onclick="deleteCodes('delete');">Clear</button>
+                            <button class="btn btn-primary" onclick="copyACode();">Copy A Code & Delete It</button>
                         </div>
                     </div>
 
@@ -83,22 +81,13 @@
 
                     <div class="d-flex gap-2 mb-3">
                         <button class="btn btn-primary" onclick="setCodes();">Save</button>
-                        <button class="btn btn-outline-danger"
-                            onclick="deleteCodes('overwrite'); setCodes();">Overwrite</button>
-                        <button class="btn btn-secondary"
-                            onclick='window.open("https://myaccount.google.com/two-step-verification/backup-codes", "_blank");'>Generate
-                            Codes</button>
+                        <button class="btn btn-outline-danger" onclick="deleteCodes('overwrite'); setCodes();">Overwrite</button>
+                        <button class="btn btn-secondary" onclick='window.open("https://myaccount.google.com/two-step-verification/backup-codes", "_blank");'>Generate Codes</button>
                     </div>
                     <div class="d-flex gap-2 mb-3">
-                        <button class="btn btn-success"
-                            onclick='navigator.clipboard.writeText(document.getElementById("email").value); window.open("https://www.gmail.com", "_blank")'>Copy
-                            Email & Open Gmail</button>
-                        <button class="btn btn-success"
-                            onclick='navigator.clipboard.writeText(document.getElementById("email").value); window.open("https://drive.google.com/drive/u/0/my-drive", "_blank")'>Copy
-                            Email & Open Drive</button>
-                        <button class="btn btn-dark"
-                            onclick='navigator.clipboard.writeText(document.getElementById("password").value)'>Copy
-                            Password</button>
+                        <button class="btn btn-success" onclick='navigator.clipboard.writeText(document.getElementById("email").value); window.open("https://www.gmail.com", "_blank")'>Copy Email & Open Gmail</button>
+                        <button class="btn btn-success" onclick='navigator.clipboard.writeText(document.getElementById("email").value); window.open("https://drive.google.com/drive/u/0/my-drive", "_blank")'>Copy Email & Open Drive</button>
+                        <button class="btn btn-dark" onclick='navigator.clipboard.writeText(document.getElementById("password").value)'>Copy Password</button>
                     </div>
                     <div class="d-flex gap-2 mt-5 justify-content-center">
                         <button class="btn btn-danger" onclick="localStorage.removeItem('safeEmail'); window.location.reload();">Logout</button>
@@ -115,6 +104,11 @@
     <script src="firebase.js"></script>
 
     <script>
+        function setNumberOfCodes() {
+            let number_of_codes = document.querySelector("#app pre").innerText.trim().split("\n").filter(c => c.length > 0).length;
+            document.getElementById("number_of_codes").innerText = number_of_codes;
+        }
+        
         if (localStorage.getItem("safeEmail") != null || undefined) {
             safeEmail = localStorage.getItem("safeEmail");
             getFirebaseData(`/${safeEmail}/password`).then(firebasePassword => {
@@ -168,10 +162,10 @@
             let codesPre = document.querySelector("#app pre");
             codesPre.innerText = "";
             getFirebaseData(`/${safeEmail}/codes`).then(data => {
-                document.getElementById("number_of_codes").innerText = "Codes (" + (data.length - 1) + " Codes Available)";
                 for (let i = 1; i < data.length; i++) {
                     codesPre.innerText += data[i] + '\n';
                 }
+                setNumberOfCodes();
             });
         }
 
@@ -182,12 +176,11 @@
                 let objLen = data.length;
                 for (let i = objLen; i < (codesTextarea.length + objLen); i++) {
                     setFirebaseData(`/${safeEmail}/codes`, i, codesTextarea[i - objLen]);
+                    document.querySelector("#app pre").innerText += codesTextarea[i - objLen] + "\n";
                 }
+                setNumberOfCodes();
             });
 
-            setTimeout(() => {
-                getCodes();
-            }, 100);
             document.querySelector("#app textarea").value = "";
         }
 
@@ -196,24 +189,25 @@
             if (confirmation) {
                 removeFirebaseData(`/${safeEmail}`, 'codes');
                 setFirebaseData(`/${safeEmail}`, 'codes/0', "control");
+                document.querySelector("#app pre").innerText = "";
+                setNumberOfCodes();
             }
         }
 
-        function copyACode(to_erase) {
-            getFirebaseData(`/${safeEmail}/codes`).then(data => {
-                code = data[data.length - 1];
-                if ((data.length - 1) != 0) {
-                    navigator.clipboard.writeText(code).then(() => {
-                        if (to_erase) {
-                            removeFirebaseData(`/${safeEmail}/codes`, (data.length - 1));
-                            getCodes();
-                        }
-                    });
-                }
-                else {
-                    alert("No Codes Available.")
-                }
-            });
+        function copyACode() {
+            let obj = document.querySelector("#app pre").innerText.trim().split("\n").filter(c => c.length > 0);
+            let objLen = obj.length;
+            if (objLen != 0) {
+                navigator.clipboard.writeText(obj[objLen - 1]).then(() => {
+                    removeFirebaseData(`/${safeEmail}/codes`, objLen);
+                    let data = document.querySelector("#app pre").innerText.replace(`${obj[objLen - 1]}\n`, "");
+                    document.querySelector("#app pre").innerText = data;
+                    setNumberOfCodes();
+                });
+            }
+            else {
+                alert("No Codes Available.")
+            }
         }
     </script>
 </body>
