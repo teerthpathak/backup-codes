@@ -50,8 +50,12 @@
                     <input class="form-control" type="password" placeholder="Confirm Password" id="confirmPassword">
                 </div>
                 <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" id="passwordlessLogin">
+                    <label class="form-check-label">Enable passwordless login for this device</label>
+                </div>
+                <div class="mb-3 form-check">
                     <input type="checkbox" class="form-check-input" id="privacypolicy_and_termsandconditions">
-                    <label class="form-check-label" for="passwordless">
+                    <label class="form-check-label">
                         By clicking on Sign Up, you agree to our <a href="privacypolicy.html" target="_blank">Privacy
                             Policy</a> and <a href="termsandconditions.html" target="_blank">Terms & Conditions.</a>
                     </label>
@@ -79,6 +83,7 @@
             let password = document.getElementById("password").value.trim();
             let confirmPassword = document.getElementById("confirmPassword").value.trim();
             let privacypolicy_and_termsandconditions = document.getElementById("privacypolicy_and_termsandconditions").checked;
+            let passwordlessLogin = document.getElementById("passwordlessLogin").checked;
 
             if (!email || !password || !confirmPassword) {
                 document.getElementById("message").style.display = "block";
@@ -107,6 +112,10 @@
                 } else {
                     setFirebaseData(`/${safeEmail}`, "password", safePassword);
                     setFirebaseData(`/${safeEmail}`, "codes/0", "control");
+
+                    if (passwordlessLogin) {
+                        localStorage.setItem("safeEmail", safeEmail);
+                    }
 
                     document.getElementById("message").style.color = "green";
                     document.getElementById("message").style.display = "block";

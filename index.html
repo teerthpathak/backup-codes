@@ -45,6 +45,10 @@
                 <div class="mb-3">
                     <input class="form-control" type="password" placeholder="Password" id="password">
                 </div>
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" id="passwordlessLogin">
+                    <label class="form-check-label">Enable passwordless login for this device</label>
+                </div>
                 <div id="message" class="mb-3 text-center">
                     <label id="message_label"></label>
                 </div>
@@ -96,6 +100,9 @@
                             onclick='navigator.clipboard.writeText(document.getElementById("password").value)'>Copy
                             Password</button>
                     </div>
+                    <div class="d-flex gap-2 mt-5 justify-content-center">
+                        <button class="btn btn-danger" onclick="localStorage.removeItem('safeEmail'); window.location.reload();">Logout</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -108,9 +115,23 @@
     <script src="firebase.js"></script>
 
     <script>
+        if (localStorage.getItem("safeEmail") != null || undefined) {
+            safeEmail = localStorage.getItem("safeEmail");
+            getFirebaseData(`/${safeEmail}/password`).then(firebasePassword => {
+                document.getElementById("email").value = convertToUserAcceptableData(safeEmail);
+                document.getElementById("password").value = convertToUserAcceptableData(firebasePassword);
+            });
+
+            document.getElementById("auth-card").style.display = "none";
+            document.getElementById("app").style.display = "unset";
+
+            getCodes();
+        }
+
         function signIn() {
             let email = document.getElementById("email").value;
             let password = document.getElementById("password").value;
+            let passwordlessLogin = document.getElementById("passwordlessLogin").checked;
 
             safeEmail = convertToFirebaseAcceptableData(email);
             let safePassword = convertToFirebaseAcceptableData(password);
@@ -131,6 +152,9 @@
                         document.getElementById("auth-card").style.display = "none";
                         document.getElementById("app").style.display = "unset";
                         getCodes();
+                        if (passwordlessLogin) {
+                            localStorage.setItem("safeEmail", safeEmail);
+                        }
                     }
                     else {
                         document.getElementById("message").style.display = "block";
@@ -161,10 +185,10 @@
                 }
             });
 
-            document.querySelector("#app textarea").value = "";
             setTimeout(() => {
                 getCodes();
             }, 100);
+            document.querySelector("#app textarea").value = "";
         }
 
         function deleteCodes(message) {

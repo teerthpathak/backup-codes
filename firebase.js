@@ -29,3 +29,12 @@ function convertToFirebaseAcceptableData(data) {
         .replaceAll("]", "ē")
         .replaceAll(" ", "æ");
 }
+
+function convertToUserAcceptableData(data) {
+    return data.replaceAll("ā", ".")
+        .replaceAll("ḥ", "#")
+        .replaceAll("ḍ", "$")
+        .replaceAll("ś", "[")
+        .replaceAll("ē", "]")
+        .replaceAll("æ", " ");
+}
